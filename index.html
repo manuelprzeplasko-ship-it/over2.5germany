@@ -12,11 +12,10 @@
       color: white;
       margin: 0;
       padding: 30px 16px;
-      text-align: center;
     }
     main {
-      max-width: 700px;
-      margin: 60px auto;
+      max-width: 760px;
+      margin: 40px auto;
     }
     h1 { color: #facc15; }
     .panel {
@@ -25,17 +24,91 @@
       padding: 24px;
       margin-top: 24px;
     }
+    .stat {
+      font-size: 28px;
+      font-weight: bold;
+      color: #facc15;
+    }
+    .error { color: #fca5a5; }
+    .muted { color: #cbd5e1; }
   </style>
 </head>
 <body>
   <main>
     <h1>🇩🇪 Germany Over Lab 1.0</h1>
-    <p>Analiza Over 2,5 gola</p>
+    <p>Analiza Over 2,5 gola w ligach niemieckich</p>
+
     <div class="panel">
-      <h2>Trzy ligi niemieckie</h2>
-      <p>Bundesliga · 2. Bundesliga · 3. Liga</p>
-      <p>Przygotowujemy bazę meczów i modele statystyczne.</p>
+      <h2>Historyczna baza meczów</h2>
+      <p id="status">Wczytywanie danych...</p>
+      <p class="muted">Łącznie:</p>
+      <div class="stat" id="total">—</div>
+      <p>Bundesliga: <strong id="d1">—</strong></p>
+      <p>2. Bundesliga: <strong id="d2">—</strong></p>
+      <p>3. Liga: <strong id="d3">Jeszcze bez danych</strong></p>
+      <p class="muted" id="dates"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Generator Over 2,5</h2>
+      <p class="muted">
+        Następny etap: prognozy Poissona,
+        walidacja i wybór singla lub dubla.
+      </p>
     </div>
   </main>
+
+  <script>
+    async function loadMatches() {
+      const status = document.getElementById("status");
+
+      try {
+        const response = await fetch(
+          "./data/all_matches.json?cache=" + Date.now()
+        );
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+
+        const matches = await response.json();
+
+        if (!Array.isArray(matches)) {
+          throw new Error("Nieprawidłowy format bazy");
+        }
+
+        const d1 = matches.filter(m => m.league === "D1");
+        const d2 = matches.filter(m => m.league === "D2");
+
+        const dates = matches
+          .map(m => m.date)
+          .filter(Boolean)
+          .sort();
+
+        document.getElementById("total").textContent =
+          matches.length.toLocaleString("pl-PL");
+
+        document.getElementById("d1").textContent =
+          d1.length.toLocaleString("pl-PL");
+
+        document.getElementById("d2").textContent =
+          d2.length.toLocaleString("pl-PL");
+
+        if (dates.length) {
+          document.getElementById("dates").textContent =
+            "Zakres danych: " + dates[0] +
+            " – " + dates[dates.length - 1];
+        }
+
+        status.textContent = "Baza została wczytana poprawnie.";
+      } catch (error) {
+        status.textContent =
+          "Nie udało się wczytać danych: " + error.message;
+        status.className = "error";
+      }
+    }
+
+    loadMatches();
+  </script>
 </body>
 </html>
