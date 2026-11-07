@@ -187,6 +187,215 @@
          style="white-space:pre-wrap;overflow-wrap:anywhere;
                 line-height:1.6;color:#e2e8f0;"></pre>
   </section>
+  
+<section id="germany-generator" style="max-width:900px;margin:24px auto;padding:22px;background:#172238;color:#f1f5f9;border-radius:14px;">
+  <h2 style="color:#f4c95d;">Generator singla Over 2,5</h2>
+  <p>Wybierz ligę, drużyny i wpisz kurs bukmachera.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+    <label>Liga
+      <select id="gen-league" style="display:block;width:100%;padding:10px;">
+        <option value="D1">Bundesliga</option>
+        <option value="D2">2. Bundesliga</option>
+      </select>
+    </label>
+
+    <label>Gospodarze
+      <select id="gen-home" style="display:block;width:100%;padding:10px;"></select>
+    </label>
+
+    <label>Goście
+      <select id="gen-away" style="display:block;width:100%;padding:10px;"></select>
+    </label>
+
+    <label>Data meczu
+      <input id="gen-date" type="date" style="display:block;width:100%;box-sizing:border-box;padding:10px;">
+    </label>
+
+    <label>Kurs Over 2,5
+      <input id="gen-odds" type="number" min="1.01" step="0.01" placeholder="np. 1.85" style="display:block;width:100%;box-sizing:border-box;padding:10px;">
+    </label>
+  </div>
+
+  <button id="gen-calculate" type="button" style="margin-top:18px;padding:12px 20px;cursor:pointer;">
+    Oblicz Over 2,5
+  </button>
+
+  <pre id="gen-result" style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;margin-top:20px;"></pre>
+
+  <p style="font-size:13px;color:#cbd5e1;">
+    Model eksperymentalny. Dodatnie szacowane EV nie gwarantuje zysku.
+  </p>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  let matches = [];
+
+  const $ = id => document.getElementById(id);
+  const fmt = p => (p * 100).toFixed(1) + "%";
+
+  function fillTeams() {
+    const league = $("gen-league").value;
+
+    const latest = new Map();
+
+    for (const m of matches) {
+      if (m.league !== league) continue;
+
+      for (const team of [m.home, m.away]) {
+        const old = latest.get(team);
+        if (!old || m.date > old) latest.set(team, m.date);
+      }
+    }
+
+    // Drużyny z ostatnich 400 dni bazy.
+    const leagueMatches = matches.filter(m => m.league === league);
+    const lastDate = leagueMatches.length
+      ? leagueMatches[leagueMatches.length - 1].date
+      : "";
+
+    const cutoff = new Date(lastDate + "T12:00:00Z");
+    cutoff.setUTCDate(cutoff.getUTCDate() - 400);
+    const cutoffDate = cutoff.toISOString().slice(0, 10);
+
+    const teams = [...latest.entries()]
+      .filter(([team, date]) => date >= cutoffDate)
+      .map(([team]) => team)
+      .sort((a, b) => a.localeCompare(b, "pl"));
+
+    for (const id of ["gen-home", "gen-away"]) {
+      const select = $(id);
+      select.replaceChildren();
+
+      for (const team of teams) {
+        const option = document.createElement("option");
+        option.value = team;
+        option.textContent = team;
+        select.appendChild(option);
+      }
+    }
+
+    if (teams.length > 1) $("gen-away").selectedIndex = 1;
+  }
+
+  async function init() {
+    const output = $("gen-result");
+    output.textContent = "Wczytywanie bazy drużyn...";
+
+    try {
+      if (!window.GermanyOverLab) {
+        throw new Error("Nie załadowano pliku app.js");
+      }
+
+      matches = await GermanyOverLab.load();
+
+      // Data domyślnie: dzisiaj według przeglądarki.
+      const now = new Date();
+      const localDate = new Date(
+        now.getTime() - now.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 10);
+
+      $("gen-date").value = localDate;
+
+      fillTeams();
+      output.textContent = "Wybierz drużyny i wpisz kurs.";
+
+    } catch (error) {
+      output.textContent = "Błąd: " + error.message;
+    }
+  }
+
+  function calculate() {
+    const output = $("gen-result");
+
+    try {
+      if (!matches.length) {
+        throw new Error("Brak danych historycznych.");
+      }
+
+      const league = $("gen-league").value;
+      const home = $("gen-home").value;
+      const away = $("gen-away").value;
+      const date = $("gen-date").value;
+      const odds = Number($("gen-odds").value);
+
+      if (!home || !away || home === away) {
+        throw new Error("Wybierz dwie różne drużyny.");
+      }
+
+      if (!date) {
+        throw new Error("Wybierz datę meczu.");
+      }
+
+      const today = new Date();
+      const localToday = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 10);
+
+      if (date < localToday) {
+        throw new Error("Wybierz dzisiejszą lub przyszłą datę.");
+      }
+
+      if (!$("gen-odds").value || !Number.isFinite(odds) || odds <= 1) {
+        throw new Error("Wpisz poprawny kurs większy od 1,00.");
+      }
+
+      const options = league === "D1"
+        ? { lastN: 20, poissonWeight: 0.5, minVenue: 30 }
+        : { lastN: 10, poissonWeight: 0, minVenue: 30 };
+
+      const result = GermanyOverLab.forecast(
+        matches, league, home, away, date, options
+      );
+
+      if (!result.eligible) {
+        output.textContent =
+          "BRAK PROGNOZY\n\n" +
+          result.reason +
+          "\n\nNie proponujemy zakładu.";
+        return;
+      }
+
+      const p = result.probability;
+      const fairOdds = 1 / p;
+      const ev = p * odds - 1;
+
+      const decision = ev > 0
+        ? "Dodatnie szacowane EV — kandydat do dalszej oceny"
+        : "Brak dodatniego EV — pomiń zakład";
+
+      output.textContent =
+        "MECZ: " + home + " – " + away + "\n" +
+        "LIGA: " + GermanyOverLab.LEAGUES[league] + "\n" +
+        "DATA: " + date + "\n\n" +
+        "Prawdopodobieństwo Over 2,5: " + fmt(p) + "\n" +
+        "Kurs uczciwy modelu: " + fairOdds.toFixed(2) + "\n" +
+        "Kurs bukmachera: " + odds.toFixed(2) + "\n" +
+        "Szacowane EV: " + fmt(ev) + "\n\n" +
+        "Model: " +
+          (league === "D1" ? "Poisson 50% / historia 50%" : "Historia 100%") +
+          "\n" +
+        "Próba gospodarzy: " + result.sample.home + "\n" +
+        "Próba gości: " + result.sample.away + "\n\n" +
+        "OCENA: " + decision + "\n\n" +
+        "Uwaga: EV zależy od jakości i kalibracji modelu. " +
+        "To nie jest potwierdzona przewaga bukmacherska.";
+
+    } catch (error) {
+      output.textContent = "Błąd: " + error.message;
+    }
+  }
+
+  $("gen-league").addEventListener("change", fillTeams);
+  $("gen-calculate").addEventListener("click", calculate);
+
+  init();
+})();
+</script>
+
 </body>
 </html>
 
