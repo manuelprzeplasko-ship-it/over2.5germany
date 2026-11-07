@@ -1,0 +1,38 @@
+
+name: Aktualizacja lig niemieckich
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v4
+
+      - name: Zainstaluj Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Pobierz wyniki Bundesligi i 2. Bundesligi
+        run: python scripts/update_germany.py
+
+      - name: Zapisz bazę meczów na GitHubie
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/all_matches.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Aktualizacja wyników lig niemieckich"
+            git push
+          else
+            echo "Brak nowych wyników."
+          fi
