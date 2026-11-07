@@ -111,5 +111,83 @@
 
     loadMatches();
   </script>
+
+  <script src="./app.js"></script>
+
+  <script>
+    async function runGermanyTest(league) {
+      const output = document.getElementById("test-results");
+
+      output.textContent = "Trwa obliczanie testu...";
+
+      try {
+        if (!window.GermanyOverLab) {
+          throw new Error("Nie udało się załadować app.js");
+        }
+
+        const matches = await GermanyOverLab.load();
+        const result = GermanyOverLab.backtest(matches, league);
+
+        if (!result.ok) {
+          output.textContent = result.reason;
+          return;
+        }
+
+        const pct = value =>
+          value == null ? "—" : (value * 100).toFixed(1) + "%";
+
+        const num = value =>
+          value == null ? "—" : value.toFixed(4);
+
+        const row = (name, r) => {
+          if (!r) return name + ": brak danych\n";
+
+          return name + "\n" +
+            "  Mecze: " + r.count + "\n" +
+            "  Brier: " + num(r.brier) + "\n" +
+            "  Log Loss: " + num(r.logLoss) + "\n" +
+            "  Śr. prognoza: " + pct(r.meanPrediction) + "\n" +
+            "  Rzeczywiste Over 2,5: " + pct(r.actualOver25) + "\n\n";
+        };
+
+        output.textContent =
+          "LIGA: " + GermanyOverLab.LEAGUES[league] + "\n\n" +
+          "Walidacja od: " + result.validationStart + "\n" +
+          "Test od: " + result.testStart + "\n\n" +
+          "PARAMETRY WYBRANE NA WALIDACJI\n" +
+          "Ostatnie mecze: " +
+            result.selectedOnValidation.lastN + "\n" +
+          "Udział Poissona: " +
+            pct(result.selectedOnValidation.poissonWeight) + "\n\n" +
+          row("WALIDACJA", result.validation) +
+          row("TEST — MODEL WYBRANY", result.test.selected) +
+          row("TEST — CZĘSTOŚĆ HISTORYCZNA", result.test.historical) +
+          row("TEST — POISSON", result.test.poisson) +
+          result.note;
+
+      } catch (error) {
+        output.textContent = "Błąd: " + error.message;
+      }
+    }
+  </script>
+
+  <section class="panel">
+    <h2>Walidacja modelu Over 2,5</h2>
+    <p>Wybierz ligę i uruchom test chronologiczny.</p>
+
+    <button onclick="runGermanyTest('D1')">
+      Test Bundesligi
+    </button>
+
+    <button onclick="runGermanyTest('D2')">
+      Test 2. Bundesligi
+    </button>
+
+    <pre id="test-results"
+         style="white-space:pre-wrap;overflow-wrap:anywhere;
+                line-height:1.6;color:#e2e8f0;"></pre>
+  </section>
 </body>
 </html>
+
+   
