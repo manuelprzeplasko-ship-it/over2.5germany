@@ -32218,5 +32218,185 @@
     "away_goals": 3,
     "total_goals": 4,
     "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-06",
+    "home": "Hamburg",
+    "away": "M'gladbach",
+    "home_goals": 3,
+    "away_goals": 1,
+    "total_goals": 4,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-06",
+    "home": "Braunschweig",
+    "away": "Cottbus",
+    "home_goals": 0,
+    "away_goals": 0,
+    "total_goals": 0,
+    "over25": false
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-06",
+    "home": "Dresden",
+    "away": "Greuther Furth",
+    "home_goals": 3,
+    "away_goals": 0,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-07",
+    "home": "Dortmund",
+    "away": "Elversberg",
+    "home_goals": 2,
+    "away_goals": 1,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-07",
+    "home": "Mainz",
+    "away": "Bayern Munich",
+    "home_goals": 1,
+    "away_goals": 2,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-07",
+    "home": "Paderborn",
+    "away": "Ein Frankfurt",
+    "home_goals": 2,
+    "away_goals": 2,
+    "total_goals": 4,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-07",
+    "home": "RB Leipzig",
+    "away": "Augsburg",
+    "home_goals": 5,
+    "away_goals": 2,
+    "total_goals": 7,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-07",
+    "home": "Stuttgart",
+    "away": "Werder Bremen",
+    "home_goals": 1,
+    "away_goals": 0,
+    "total_goals": 1,
+    "over25": false
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-07",
+    "home": "Hertha",
+    "away": "Wolfsburg",
+    "home_goals": 2,
+    "away_goals": 1,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-07",
+    "home": "Holstein Kiel",
+    "away": "Bielefeld",
+    "home_goals": 1,
+    "away_goals": 2,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-07",
+    "home": "Nurnberg",
+    "away": "Darmstadt",
+    "home_goals": 2,
+    "away_goals": 0,
+    "total_goals": 2,
+    "over25": false
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-07",
+    "home": "Osnabruck",
+    "away": "Kaiserslautern",
+    "home_goals": 0,
+    "away_goals": 1,
+    "total_goals": 1,
+    "over25": false
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-08",
+    "home": "FC Koln",
+    "away": "Leverkusen",
+    "home_goals": 1,
+    "away_goals": 2,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-08",
+    "home": "Freiburg",
+    "away": "Union Berlin",
+    "home_goals": 2,
+    "away_goals": 0,
+    "total_goals": 2,
+    "over25": false
+  },
+  {
+    "league": "D1",
+    "date": "2026-11-08",
+    "home": "Hoffenheim",
+    "away": "Schalke 04",
+    "home_goals": 2,
+    "away_goals": 1,
+    "total_goals": 3,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-08",
+    "home": "Bochum",
+    "away": "Karlsruhe",
+    "home_goals": 3,
+    "away_goals": 2,
+    "total_goals": 5,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-08",
+    "home": "Heidenheim",
+    "away": "Hannover",
+    "home_goals": 2,
+    "away_goals": 2,
+    "total_goals": 4,
+    "over25": true
+  },
+  {
+    "league": "D2",
+    "date": "2026-11-08",
+    "home": "Magdeburg",
+    "away": "St Pauli",
+    "home_goals": 4,
+    "away_goals": 1,
+    "total_goals": 5,
+    "over25": true
   }
 ]
